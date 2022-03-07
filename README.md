@@ -22,3 +22,9 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+### 文档
+```
+http://edufront.lagounews.com/front/doc.html#/home
+http://eduboss.lagounews.com/boss/doc.html#/home
+```
