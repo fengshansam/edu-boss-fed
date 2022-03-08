@@ -15,6 +15,16 @@ const redirectLogin = () => {
   })
 }
 
+const refreshToken = () => {
+  return axios.create()({
+    method: 'POST',
+    url: '/front/user/refresh_token',
+    data: qs.stringify({
+      refreshtoken: store.state.user.refresh_token
+    })
+  })
+}
+
 request.interceptors.request.use(
   function (config) {
     const { user } = store.state
@@ -27,12 +37,13 @@ request.interceptors.request.use(
     return Promise.reject(error)
   }
 )
-
+let isRefreshing = false // 控制刷新token的状态
+let requests = [] // 存储刷新token期间过来的401请求
 request.interceptors.response.use(
   function (response) {
     return response
   },
-  async function (error) {
+  function (error) {
     if (error.response) {
       // 请求发出去收到响应，但是状态码超出了2xx范围
       const { status } = error.response
@@ -43,23 +54,33 @@ request.interceptors.response.use(
           redirectLogin()
           return Promise.reject(error)
         }
-        try {
-          // 重新拿token
-          const { data } = await axios.create()({
-            method: 'POST',
-            url: '/front/user/refresh_token',
-            data: qs.stringify({
-              refreshtoken: store.state.user.refresh_token
-            })
+
+        if (!isRefreshing) {
+          isRefreshing = true
+          return refreshToken().then(res => {
+            if (!res.data.success) {
+              throw new Error('刷新token失败')
+            }
+            store.commit('setUser', res.data.content)
+            requests.forEach(cd => cd())
+            // 重置requests数组
+            requests = []
+            // 把本次失败请求重新发出去
+            return request(error.config)
+          }).catch(error => {
+            store.commit('setUser', null)
+            redirectLogin()
+            return Promise.reject(error)
+          }).finally(() => {
+            isRefreshing = false
           })
-          store.commit('setUser', data.content)
-          // 把本次失败请求重新发出去
-          return request(error.config)
-        } catch (error) {
-          store.commit('setUser', null)
-          redirectLogin()
-          return Promise.reject(error)
         }
+        // 存储token刷新期间过来的请求
+        return new Promise(resolve => {
+          requests.push(() => {
+            resolve(request(error.config))
+          })
+        })
         // token无效
       } else if (status === 403) {
         Message.error('没有权限，请联系管理员')
