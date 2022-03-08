@@ -67,9 +67,10 @@ export default Vue.extend({
           }
           this.$store.commit('setUser', data.content)
           this.$message.success('登录成功！')
-          this.$router.push({
-            name: 'home'
-          })
+          // this.$router.push({
+          //   name: 'home'
+          // })
+          this.$router.push(this.$route.query.redirect as string || '/')
         }
       })
     }
