@@ -19,7 +19,7 @@
             <i class="el-icon-setting"></i>
             <span slot="title">角色管理</span>
           </el-menu-item>
-          <el-menu-item index="menu">
+          <el-menu-item index="/menu">
             <i class="el-icon-setting"></i>
             <span slot="title">菜单管理</span>
           </el-menu-item>

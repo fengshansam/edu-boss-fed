@@ -7,3 +7,9 @@ export const getResourcePages = (data: any) => {
     data
   })
 }
+export const getAllCategory = () => {
+  return request({
+    method: 'GET',
+    url: '/boss/resource/category/getAll'
+  })
+}
