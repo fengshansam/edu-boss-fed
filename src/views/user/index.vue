@@ -31,9 +31,8 @@
         <el-table-column label="操作" width="100">
           <template slot-scope="scope">
             <el-button @click="handleClick(scope.row)" type="text" size="small"
-              >查看</el-button
+              >分配角色</el-button
             >
-            <el-button type="text" size="small">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -49,18 +48,40 @@
       :total="totalCount"
     >
     </el-pagination>
+    <el-dialog
+      title="分配角色"
+      :visible.sync="dialogVisible"
+      width="30%"
+      :before-close="handleClose"
+      top="30vh"
+    >
+      <el-select v-model="roleIdList" multiple placeholder="请选择">
+        <el-option
+          v-for="item in roles"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id"
+        >
+        </el-option>
+      </el-select>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submit">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { getUserPages } from '@/services/user'
+import { getAllRoles, allocateUserRoles, getUserRole } from '@/services/role'
 export default Vue.extend({
   name: 'userIndex',
   data () {
     return {
       form: {
         currentPage: 0,
-        pageSize: 0,
+        pageSize: 10,
         phone: '',
         startCreateTime: '',
         endCreateTime: ''
@@ -68,7 +89,11 @@ export default Vue.extend({
       resourceData: [],
       totalCount: 0,
       categorys: [],
-      isLoading: true
+      isLoading: true,
+      dialogVisible: false,
+      roles: [],
+      roleIdList: [],
+      currentUser: {}
     }
   },
   created () {
@@ -84,8 +109,17 @@ export default Vue.extend({
         this.totalCount = res.data.total
       }
     },
-    handleClick () {
-      console.log()
+    handleClick (currentUser: any) {
+      this.currentUser = currentUser
+      this.dialogVisible = true
+      this.getAllRoles()
+      this.getUserRole((this.currentUser as any).id)
+    },
+    async getUserRole (userId: string | number) {
+      const { data: res } = await getUserRole(userId)
+      this.roleIdList = res.data.map((item: any) => {
+        return item.id
+      })
     },
     onSubmit () {
       console.log('submit!')
@@ -102,6 +136,30 @@ export default Vue.extend({
       console.log(`当前页: ${val}`)
       this.form.currentPage = val
       this.loadUsers()
+    },
+    handleClose (done: any) {
+      this.$confirm('确认关闭？')
+        .then((_) => {
+          done()
+        })
+        .catch((_) => {
+          console.log(_)
+        })
+    },
+    async getAllRoles () {
+      const { data: res } = await getAllRoles()
+      this.roles = res.data
+    },
+    async submit () {
+      const params = {
+        userId: (this.currentUser as any).id,
+        roleIdList: this.roleIdList
+      }
+      const { data: res } = await allocateUserRoles(params)
+      this.$message.success('提交成功')
+      this.dialogVisible = false
+      this.currentUser = {}
+      this.roleIdList = []
     }
   }
 })
