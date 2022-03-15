@@ -3,8 +3,8 @@
     <el-card class="box-card">
       <div slot="header" class="clearfix">
         <el-form :inline="true" :model="form" class="demo-form-inline">
-          <el-form-item label="资源名称">
-            <el-input v-model="form.name" placeholder="资源名称"></el-input>
+          <el-form-item label="课程名称">
+            <el-input v-model="form.courseName" placeholder="资源名称"></el-input>
           </el-form-item>
           <el-form-item label="资源路径">
             <el-input v-model="form.url" placeholder="资源路径"></el-input>
@@ -70,7 +70,12 @@
                 size="small"
                 >查看</el-button
               >
-              <el-button type="text" size="small">编辑</el-button>
+              <el-button type="text" size="small" @click="$router.push({
+                name: 'create-course',
+                query: {
+                  courseId: scope.row.id
+                }
+              })">编辑</el-button>
             </template>
           </el-table-column>
         </el-table>

@@ -1,6 +1,8 @@
 <template>
   <div class="course-img">
+    <el-progress type="circle" v-if="isLoading" :percentage="percentage" :status=" percentage === 100 ? 'success' : undefined" :width="178"></el-progress>
     <el-upload
+      v-else
       class="avatar-uploader"
       action=""
       :show-file-list="false"
@@ -23,7 +25,10 @@ export default Vue.extend({
     }
   },
   data () {
-    return {}
+    return {
+      isLoading: false,
+      percentage: 0
+    }
   },
   methods: {
     beforeAvatarUpload (file: any) {
@@ -40,8 +45,12 @@ export default Vue.extend({
     },
     async handleUpload (fileData: any) {
       const fd = new FormData()
+      this.isLoading = true
       fd.append('file', fileData.file)
-      const { data: res } = await uploadImg(fd)
+      const { data: res } = await uploadImg(fd, (e: any) => {
+        this.percentage = Math.floor(e.loaded / e.total * 100)
+      })
+      this.isLoading = false
       this.$emit('input', res.data.name)
     }
   }

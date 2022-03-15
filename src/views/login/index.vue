@@ -70,7 +70,8 @@ export default Vue.extend({
           // this.$router.push({
           //   name: 'home'
           // })
-          this.$router.push(this.$route.query.redirect as string || '/')
+          // this.$router.push(this.$route.query.redirect as string || '/')
+          this.$router.push('/')
         }
       })
     }

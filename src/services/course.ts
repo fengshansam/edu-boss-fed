@@ -21,10 +21,18 @@ export const saveOrUpdateCourse = (data: any) => {
     data
   })
 }
-export const uploadImg = (data: any) => {
+export const uploadImg = (data: any, onUploadProgress: any) => {
   return request({
     method: 'POST',
     url: '/boss/course/upload',
-    data
+    data,
+    onUploadProgress
+  })
+}
+export const getCourseById = (params: any) => {
+  return request({
+    method: 'GET',
+    url: '/boss/course/getCourseById',
+    params
   })
 }
